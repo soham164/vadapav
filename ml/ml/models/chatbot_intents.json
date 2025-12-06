@@ -1,0 +1,357 @@
+{
+  "intents": [
+    {
+      "tag": "greeting",
+      "patterns": [
+        "Hi",
+        "Hello",
+        "Hey",
+        "Good morning",
+        "Good afternoon",
+        "Good evening",
+        "Greetings",
+        "What's up",
+        "How are you",
+        "Hi there",
+        "Hello there",
+        "Hey there"
+      ],
+      "responses": [
+        "Hello! I'm your financial advisor. How can I help you today?",
+        "Hi there! I'm here to help with your financial questions.",
+        "Greetings! What financial information can I provide for you?",
+        "Hello! Ready to assist you with loans, savings, and financial planning."
+      ]
+    },
+    {
+      "tag": "goodbye",
+      "patterns": [
+        "Bye",
+        "Goodbye",
+        "See you",
+        "Talk to you later",
+        "Catch you later",
+        "I'm leaving",
+        "Have to go",
+        "Exit",
+        "Quit",
+        "Thanks bye"
+      ],
+      "responses": [
+        "Goodbye! Feel free to return if you have more questions.",
+        "See you later! Take care of your finances!",
+        "Bye! Remember to check your financial health regularly.",
+        "Take care! I'm here whenever you need financial advice."
+      ]
+    },
+    {
+      "tag": "thanks",
+      "patterns": [
+        "Thanks",
+        "Thank you",
+        "That's helpful",
+        "Thanks a lot",
+        "I appreciate it",
+        "Thanks for the help",
+        "Appreciate it",
+        "Thank you so much",
+        "Perfect thanks"
+      ],
+      "responses": [
+        "You're welcome! Happy to help!",
+        "Glad I could assist you!",
+        "Anytime! Feel free to ask more questions.",
+        "My pleasure! Let me know if you need anything else."
+      ]
+    },
+    {
+      "tag": "loan_affordability",
+      "patterns": [
+        "Can I afford a loan",
+        "How much loan can I take",
+        "Loan affordability",
+        "What loan amount can I get",
+        "Am I eligible for loan",
+        "Can I get a loan",
+        "How much can I borrow",
+        "What's my loan capacity",
+        "Loan eligibility amount",
+        "Maximum loan I can take",
+        "Can I afford",
+        "Loan amount for me"
+      ],
+      "responses": [
+        "Based on your financial profile, I can calculate your loan affordability. Your average monthly income and expense ratio are key factors. Would you like me to check your specific loan capacity?",
+        "To determine loan affordability, I analyze your income, expenses, and existing obligations. Your current financial health score suggests you may qualify for loans. Shall I provide specific recommendations?",
+        "Loan affordability depends on your income stability and debt-to-income ratio. Based on your transaction history, I can estimate your borrowing capacity. Would you like detailed calculations?"
+      ],
+      "action": "calculate_affordability"
+    },
+    {
+      "tag": "emi_calculation",
+      "patterns": [
+        "Calculate EMI",
+        "What's the EMI",
+        "EMI for loan",
+        "Monthly installment",
+        "How much is EMI",
+        "EMI calculation",
+        "Monthly payment",
+        "Installment amount",
+        "What will be my EMI",
+        "EMI calculator",
+        "Monthly EMI",
+        "Calculate monthly payment"
+      ],
+      "responses": [
+        "I can calculate your EMI based on loan amount, interest rate, and tenure. Please specify the loan amount you're interested in.",
+        "EMI calculation requires the loan amount, interest rate, and repayment period. What loan amount are you considering?",
+        "I'll help you calculate the monthly EMI. Could you tell me the loan amount you need?"
+      ],
+      "action": "calculate_emi"
+    },
+    {
+      "tag": "income_query",
+      "patterns": [
+        "What's my income",
+        "Show my income",
+        "My earnings",
+        "How much do I earn",
+        "Total income",
+        "Monthly income",
+        "Income details",
+        "My salary",
+        "What do I make",
+        "Income summary",
+        "Earnings report",
+        "Income statement"
+      ],
+      "responses": [
+        "Let me fetch your income details from your transaction history.",
+        "I'll analyze your income patterns and provide a summary.",
+        "Checking your income records now..."
+      ],
+      "action": "get_income"
+    },
+    {
+      "tag": "expense_query",
+      "patterns": [
+        "What are my expenses",
+        "Show expenses",
+        "How much do I spend",
+        "My spending",
+        "Expense details",
+        "Where does my money go",
+        "Spending patterns",
+        "Expense breakdown",
+        "What am I spending on",
+        "Monthly expenses",
+        "Expense report",
+        "Spending summary"
+      ],
+      "responses": [
+        "I'll analyze your expense patterns and show you where your money is going.",
+        "Let me break down your expenses by category.",
+        "Fetching your expense details now..."
+      ],
+      "action": "get_expenses"
+    },
+    {
+      "tag": "savings_query",
+      "patterns": [
+        "How much am I saving",
+        "My savings",
+        "Savings rate",
+        "Am I saving enough",
+        "What's my savings",
+        "Savings amount",
+        "How much do I save",
+        "Savings percentage",
+        "Net savings",
+        "Savings summary",
+        "Saving money"
+      ],
+      "responses": [
+        "I'll calculate your savings based on your income and expenses.",
+        "Let me analyze your savings rate and provide recommendations.",
+        "Checking your savings patterns now..."
+      ],
+      "action": "get_savings"
+    },
+    {
+      "tag": "eligibility_score",
+      "patterns": [
+        "What's my eligibility score",
+        "Loan eligibility",
+        "Credit score",
+        "Am I eligible",
+        "Eligibility check",
+        "My score",
+        "Credit rating",
+        "Loan approval chances",
+        "What's my rating",
+        "Eligibility status",
+        "Check my eligibility",
+        "Score details"
+      ],
+      "responses": [
+        "I'll fetch your loan eligibility score calculated by our ML model.",
+        "Let me check your eligibility score based on your financial profile.",
+        "Analyzing your eligibility score now..."
+      ],
+      "action": "get_eligibility"
+    },
+    {
+      "tag": "health_score",
+      "patterns": [
+        "Financial health",
+        "Health score",
+        "How healthy are my finances",
+        "Financial wellness",
+        "My financial health",
+        "Health rating",
+        "Financial status",
+        "How am I doing financially",
+        "Financial checkup",
+        "Overall financial health",
+        "Wellness score"
+      ],
+      "responses": [
+        "I'll provide your comprehensive financial health score.",
+        "Let me analyze your overall financial wellness.",
+        "Checking your financial health score now..."
+      ],
+      "action": "get_health"
+    },
+    {
+      "tag": "improve_score",
+      "patterns": [
+        "How to improve score",
+        "Improve my rating",
+        "Better credit score",
+        "Increase eligibility",
+        "Improve financial health",
+        "Tips to improve",
+        "How can I improve",
+        "Make my score better",
+        "Boost my score",
+        "Improve my chances",
+        "Better financial health",
+        "Score improvement tips"
+      ],
+      "responses": [
+        "I'll provide personalized tips to improve your financial scores.",
+        "Let me analyze your profile and suggest improvements.",
+        "Based on your current status, here are ways to improve..."
+      ],
+      "action": "improve_tips"
+    },
+    {
+      "tag": "loan_products",
+      "patterns": [
+        "What loans are available",
+        "Show loan products",
+        "Loan options",
+        "Available loans",
+        "Types of loans",
+        "Loan offerings",
+        "What loans do you have",
+        "Loan products",
+        "Show me loans",
+        "Available loan schemes"
+      ],
+      "responses": [
+        "I'll show you the available loan products that match your profile.",
+        "Let me fetch the loan options suitable for you.",
+        "Checking available loan products now..."
+      ],
+      "action": "get_loan_products"
+    },
+    {
+      "tag": "loan_recommendation",
+      "patterns": [
+        "Recommend a loan",
+        "Best loan for me",
+        "Which loan should I take",
+        "Loan suggestions",
+        "Suitable loans",
+        "Match me with loans",
+        "Find loans for me",
+        "Best loan options",
+        "Loan matching",
+        "What loan fits me",
+        "Personalized loan recommendations"
+      ],
+      "responses": [
+        "I'll analyze your profile and recommend the best loan products.",
+        "Let me match you with suitable loan options.",
+        "Finding the best loans for your financial situation..."
+      ],
+      "action": "recommend_loans"
+    },
+    {
+      "tag": "financial_advice",
+      "patterns": [
+        "Financial advice",
+        "Money tips",
+        "How to manage money",
+        "Financial planning",
+        "Budgeting tips",
+        "Money management",
+        "Financial guidance",
+        "Help with finances",
+        "Money advice",
+        "Financial tips",
+        "How to save money",
+        "Budget advice"
+      ],
+      "responses": [
+        "I can provide personalized financial advice based on your profile. What specific area would you like guidance on?",
+        "I'm here to help with financial planning. Would you like advice on budgeting, saving, or loan management?",
+        "Let me provide tailored financial advice based on your current situation."
+      ],
+      "action": "financial_advice"
+    },
+    {
+      "tag": "transaction_history",
+      "patterns": [
+        "Show transactions",
+        "Transaction history",
+        "My transactions",
+        "Recent transactions",
+        "Transaction list",
+        "Payment history",
+        "Show my payments",
+        "Transaction details",
+        "Recent payments"
+      ],
+      "responses": [
+        "I'll fetch your recent transaction history.",
+        "Let me show you your transaction records.",
+        "Retrieving your transaction history now..."
+      ],
+      "action": "get_transactions"
+    },
+    {
+      "tag": "help",
+      "patterns": [
+        "Help",
+        "What can you do",
+        "How can you help",
+        "Features",
+        "What do you offer",
+        "Capabilities",
+        "What questions can I ask",
+        "How to use",
+        "Guide",
+        "Instructions",
+        "What can I ask"
+      ],
+      "responses": [
+        "I can help you with:\n\u2022 Loan affordability and EMI calculations\n\u2022 Income, expense, and savings analysis\n\u2022 Eligibility and health scores\n\u2022 Loan recommendations\n\u2022 Financial advice and tips\n\u2022 Transaction history\n\nWhat would you like to know?",
+        "I'm your AI financial advisor! I can analyze your finances, calculate loan eligibility, recommend products, and provide personalized advice. What can I help you with today?",
+        "I offer comprehensive financial assistance including loan calculations, score analysis, product recommendations, and money management tips. How can I assist you?"
+      ]
+    }
+  ]
+}

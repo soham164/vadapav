@@ -388,14 +388,22 @@ app.post('/api/loan-matching/recommendations', authenticateToken, async (req, re
 
 // ============= CHATBOT ROUTES =============
 
-// Chatbot message
+// Chatbot message - NLP Powered
 app.post('/api/chatbot/message', authenticateToken, async (req, res) => {
   try {
     const { message } = req.body;
 
-    // Get user context
+    // Call Python NLP chatbot
+    const { stdout } = await execPromise(
+      `python3 ml/chatbot_nlp.py predict "${message.replace(/"/g, '\\"')}" ${req.user.id}`,
+      { cwd: __dirname + '/..' }
+    );
+
+    const nlpResult = JSON.parse(stdout);
+    
+    // Get user context for action execution
     const cashflowRes = await pool.query(
-      'SELECT AVG(CASE WHEN type = \'income\' THEN amount ELSE 0 END) as avg_income FROM transactions WHERE user_id = $1',
+      'SELECT AVG(CASE WHEN type = \'income\' THEN amount ELSE 0 END) as avg_income, AVG(CASE WHEN type = \'expense\' THEN amount ELSE 0 END) as avg_expense FROM transactions WHERE user_id = $1',
       [req.user.id]
     );
 
@@ -405,38 +413,83 @@ app.post('/api/chatbot/message', authenticateToken, async (req, res) => {
     );
 
     const avgIncome = parseFloat(cashflowRes.rows[0]?.avg_income) || 0;
+    const avgExpense = parseFloat(cashflowRes.rows[0]?.avg_expense) || 0;
     const healthScore = scoresRes.rows[0]?.health_score || 50;
     const eligibilityScore = scoresRes.rows[0]?.eligibility_score || 50;
+    const riskLevel = scoresRes.rows[0]?.risk_level || 'MEDIUM';
 
-    // Rule-based chatbot logic
-    const msg = message.toLowerCase();
-    let response = '';
-
-    if (msg.includes('loan') && msg.includes('afford')) {
-      const match = msg.match(/\d+/);
-      if (match) {
-        const amount = parseInt(match[0]);
-        const maxEMI = avgIncome * 0.4;
-        const emi = amount * 0.01 * 24; // Simplified
-        
-        response = emi <= maxEMI ?
-          `Based on your income of ₹${Math.round(avgIncome)}, you can afford a loan of ₹${amount}. EMI: ~₹${Math.round(emi)}.` :
-          `A loan of ₹${amount} might be challenging with your current income of ₹${Math.round(avgIncome)}.`;
+    let response = nlpResult.response;
+    
+    // Execute action based on intent
+    if (nlpResult.action) {
+      switch (nlpResult.action) {
+        case 'calculate_affordability':
+          const maxLoan = avgIncome * 0.4 * 24 / 0.01; // Simplified
+          response += `\n\nBased on your average monthly income of ₹${Math.round(avgIncome)}, you can afford a loan up to ₹${Math.round(maxLoan)} with comfortable EMI payments.`;
+          break;
+          
+        case 'calculate_emi':
+          const match = message.match(/\d+/);
+          if (match) {
+            const amount = parseInt(match[0]);
+            const rate = 0.12 / 12;
+            const tenure = 24;
+            const emi = amount * rate * Math.pow(1 + rate, tenure) / (Math.pow(1 + rate, tenure) - 1);
+            response += `\n\nFor a loan of ₹${amount} at 12% interest for 24 months:\n• Monthly EMI: ₹${Math.round(emi)}\n• Total Payable: ₹${Math.round(emi * tenure)}\n• Total Interest: ₹${Math.round(emi * tenure - amount)}`;
+          }
+          break;
+          
+        case 'get_income':
+          response += `\n\nYour average monthly income is ₹${Math.round(avgIncome)}. This is calculated from your transaction history.`;
+          break;
+          
+        case 'get_expenses':
+          response += `\n\nYour average monthly expenses are ₹${Math.round(avgExpense)}. Your expense-to-income ratio is ${Math.round((avgExpense / avgIncome) * 100)}%.`;
+          break;
+          
+        case 'get_savings':
+          const savings = avgIncome - avgExpense;
+          const savingsRate = avgIncome > 0 ? (savings / avgIncome) * 100 : 0;
+          response += `\n\nYour average monthly savings: ₹${Math.round(savings)}\nSavings rate: ${Math.round(savingsRate)}%\n${savingsRate > 20 ? '✅ Great job!' : '⚠️ Try to save at least 20% of your income.'}`;
+          break;
+          
+        case 'get_eligibility':
+          response += `\n\nYour loan eligibility score: ${eligibilityScore}/100\nRisk Level: ${riskLevel}\nThis score is based on your income stability, expense patterns, and cashflow consistency.`;
+          break;
+          
+        case 'get_health':
+          response += `\n\nYour financial health score: ${healthScore}/100\nThis reflects your overall financial wellness including cashflow stability, savings rate, and debt management.`;
+          break;
+          
+        case 'improve_tips':
+          const tips = [];
+          if (healthScore < 70) {
+            if (avgExpense / avgIncome > 0.7) tips.push('Reduce expenses to below 70% of income');
+            if ((avgIncome - avgExpense) / avgIncome < 0.2) tips.push('Increase savings rate to at least 20%');
+            tips.push('Maintain consistent positive cashflow');
+          }
+          response += tips.length > 0 ? 
+            `\n\n💡 Tips to improve your score:\n${tips.map((t, i) => `${i + 1}. ${t}`).join('\n')}` :
+            `\n\n✅ Your score is already strong! Keep maintaining healthy financial habits.`;
+          break;
       }
-    } else if (msg.includes('improve') && msg.includes('score')) {
-      response = healthScore < 70 ?
-        `To improve your score (current: ${healthScore}/100), focus on: maintaining consistent cashflow, increasing savings, and reducing debt.` :
-        `Your score is strong at ${healthScore}/100! Keep maintaining healthy habits.`;
-    } else if (msg.includes('eligibility')) {
-      response = `Your loan eligibility score is ${eligibilityScore}/100 with ${scoresRes.rows[0]?.risk_level || 'MEDIUM'} risk level.`;
-    } else {
-      response = `I can help with loan affordability, score improvement, and eligibility questions. Your health score: ${healthScore}/100.`;
     }
 
-    res.json({ response, timestamp: new Date().toISOString() });
+    res.json({ 
+      response, 
+      intent: nlpResult.intent,
+      confidence: nlpResult.confidence,
+      timestamp: new Date().toISOString() 
+    });
   } catch (error) {
     console.error('Chatbot error:', error);
-    res.status(500).json({ error: 'Chatbot service unavailable' });
+    // Fallback to simple response
+    res.json({ 
+      response: "I'm here to help with your financial questions. Could you please rephrase that?",
+      intent: 'unknown',
+      confidence: 0,
+      timestamp: new Date().toISOString() 
+    });
   }
 });
 
