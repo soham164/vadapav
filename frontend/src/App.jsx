@@ -205,6 +205,7 @@ const mockAPI = {
     const msg = message.toLowerCase();
     let response = '';
 
+    // Loan affordability
     if (msg.includes('loan') && msg.includes('afford')) {
       const match = msg.match(/\d+/);
       if (match) {
@@ -220,8 +221,12 @@ const mockAPI = {
         } else {
           response = `A loan of ₹${amount} might be challenging. The estimated EMI of ₹${Math.round(emi)} exceeds 40% of your monthly income. Consider a smaller amount or longer tenure.`;
         }
+      } else {
+        response = `To check loan affordability, please specify an amount. For example: "Can I afford a loan of 200000?"`;
       }
-    } else if (msg.includes('improve') && msg.includes('score')) {
+    } 
+    // Score improvement
+    else if (msg.includes('improve') && msg.includes('score')) {
       const suggestions = [];
       if (health.health_score < 70) {
         if (health.breakdown.cashflow_stability < 70) suggestions.push('maintain consistent positive cashflow');
@@ -231,10 +236,66 @@ const mockAPI = {
       response = suggestions.length > 0 ?
         `To improve your score, focus on: ${suggestions.join(', ')}. Your current health score is ${health.health_score}/100.` :
         `Your score is already strong at ${health.health_score}/100! Keep maintaining healthy financial habits.`;
-    } else if (msg.includes('eligibility')) {
+    } 
+    // Eligibility check
+    else if (msg.includes('eligibility') || msg.includes('eligible')) {
       response = `Your current loan eligibility score is ${eligibility.eligibility_score}/100 with a ${eligibility.risk_level} risk level. This is based on your income stability, expense patterns, and cashflow consistency.`;
-    } else {
-      response = `I can help you with questions about loan affordability, improving your financial scores, EMI calculations, and eligibility. Your current financial health score is ${health.health_score}/100. What would you like to know?`;
+    }
+    // Income questions
+    else if (msg.includes('income') || msg.includes('earning')) {
+      response = `Your average monthly income is ₹${Math.round(summary.avgMonthlyIncome)}. Total income: ₹${Math.round(summary.totalIncome)}. This is calculated from your transaction history.`;
+    }
+    // Expense questions
+    else if (msg.includes('expense') || msg.includes('spending')) {
+      response = `Your average monthly expenses are ₹${Math.round(summary.avgMonthlyExpenses)}. Total expenses: ₹${Math.round(summary.totalExpenses)}. Your expense to income ratio is ${Math.round((summary.avgMonthlyExpenses / summary.avgMonthlyIncome) * 100)}%.`;
+    }
+    // Savings questions
+    else if (msg.includes('saving') || msg.includes('save')) {
+      const savings = summary.netCashflow;
+      const savingsRate = summary.avgMonthlyIncome > 0 ? (savings / summary.totalIncome) * 100 : 0;
+      response = `Your net savings are ₹${Math.round(savings)}. Your savings rate is ${Math.round(savingsRate)}%. ${savingsRate > 20 ? 'Great job!' : 'Try to save at least 20% of your income.'}`;
+    }
+    // EMI calculation
+    else if (msg.includes('emi') || msg.includes('installment')) {
+      const match = msg.match(/\d+/);
+      if (match) {
+        const amount = parseInt(match[0]);
+        const rate = 0.12 / 12;
+        const tenure = 24;
+        const emi = amount * rate * Math.pow(1 + rate, tenure) / (Math.pow(1 + rate, tenure) - 1);
+        response = `For a loan of ₹${amount} at 12% interest for 24 months, your EMI would be approximately ₹${Math.round(emi)}. Total payable: ₹${Math.round(emi * tenure)}.`;
+      } else {
+        response = `To calculate EMI, please specify a loan amount. For example: "What's the EMI for 100000?"`;
+      }
+    }
+    // Health score
+    else if (msg.includes('health')) {
+      response = `Your financial health score is ${health.health_score}/100 (${health.category}). Breakdown: Cashflow Stability ${health.breakdown.cashflow_stability}%, Savings Rate ${health.breakdown.savings_rate}%, Debt Management ${100 - health.breakdown.debt_ratio}%.`;
+    }
+    // Loan products
+    else if (msg.includes('loan') && (msg.includes('product') || msg.includes('option') || msg.includes('available'))) {
+      response = `We have ${this.loanProducts.length} loan products available with interest rates from ${Math.min(...this.loanProducts.map(p => p.interest_rate))}% to ${Math.max(...this.loanProducts.map(p => p.interest_rate))}%. Visit the Loan Matching page to find the best options for you!`;
+    }
+    // Greetings
+    else if (msg.includes('hello') || msg.includes('hi') || msg.includes('hey')) {
+      response = `Hello! I'm your financial advisor. I can help you with loan affordability, EMI calculations, improving your scores, and understanding your financial health. What would you like to know?`;
+    }
+    // Thanks
+    else if (msg.includes('thank') || msg.includes('thanks')) {
+      response = `You're welcome! Feel free to ask me anything about your finances anytime. I'm here to help!`;
+    }
+    // Default response
+    else {
+      response = `I can help you with:
+• Loan affordability ("Can I afford a loan of 200000?")
+• EMI calculations ("What's the EMI for 100000?")
+• Score improvement tips ("How can I improve my score?")
+• Income & expense analysis ("What's my income?")
+• Savings advice ("How much am I saving?")
+• Eligibility check ("What's my eligibility?")
+• Financial health ("What's my health score?")
+
+Your current health score is ${health.health_score}/100. What would you like to know?`;
     }
 
     return { response, timestamp: new Date().toISOString() };
