@@ -1,0 +1,17 @@
+{
+  "feature_columns": [
+    "avg_monthly_income",
+    "income_stability",
+    "expense_to_income_ratio",
+    "emi_to_income_ratio",
+    "cashflow_consistency",
+    "months_history",
+    "has_credit_history",
+    "credit_score",
+    "business_age_years"
+  ],
+  "model_type": "GradientBoostingClassifier",
+  "auc_score": 0.7828448690517658,
+  "training_date": "2025-12-06T19:35:59.936268",
+  "n_features": 9
+}
